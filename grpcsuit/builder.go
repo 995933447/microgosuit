@@ -2,6 +2,7 @@ package grpcsuit
 
 import (
 	"context"
+	"github.com/995933447/elemutil"
 	"github.com/995933447/microgosuit/discovery"
 	"github.com/995933447/microgosuit/factory"
 	"github.com/gzjjyz/srvlib/alg/doublelinked"
@@ -16,7 +17,7 @@ func NewBuilder(ctx context.Context, resolveSchema string) (resolver.Builder, er
 	}
 
 	builder := &Builder{
-		srvNameToResolversMap: map[string]*doublelinked.LinkedList{},
+		srvNameToResolversMap: map[string]*elemutil.LinkedList{},
 	}
 
 	discover.OnSrvUpdated(func(ctx context.Context, evt discovery.Evt, srv *discovery.Service) {
@@ -28,7 +29,7 @@ func NewBuilder(ctx context.Context, resolveSchema string) (resolver.Builder, er
 			return
 		}
 
-		_ = resolvers.Walk(func(node *doublelinked.LinkedNode) (bool, error) {
+		_ = resolvers.Walk(func(node *elemutil.LinkedNode) (bool, error) {
 			node.Payload.(*Resolver).UpdateSrvCfg(srv)
 			return true, nil
 		})
@@ -47,7 +48,7 @@ func NewBuilder(ctx context.Context, resolveSchema string) (resolver.Builder, er
 }
 
 type Builder struct {
-	srvNameToResolversMap map[string]*doublelinked.LinkedList
+	srvNameToResolversMap map[string]*elemutil.LinkedList
 	discover              discovery.Discovery
 	mu                    sync.RWMutex
 	resolveSchema         string
@@ -69,7 +70,7 @@ func (b *Builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 
 	resolvers, ok := b.srvNameToResolversMap[srvName]
 	if !ok {
-		resolvers = &doublelinked.LinkedList{}
+		resolvers = &elemutil.LinkedList{}
 		b.srvNameToResolversMap[srvName] = resolvers
 	}
 	resolvers.Append(&doublelinked.LinkedNode{

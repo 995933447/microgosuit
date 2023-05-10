@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/995933447/confloader v0.0.0-20230314141707-e7b191386ae2
+	github.com/995933447/elemutil v0.0.0-20230419031952-50d9019c3314
 	github.com/995933447/log-go v0.0.0-20230420123341-5d684963433b
 	github.com/995933447/std-go v0.0.0-20220806175833-ab3496c0b696
 	github.com/etcd-io/etcd v3.3.27+incompatible
@@ -33,12 +34,8 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
-	github.com/huandu/go-clone v1.6.0 // indirect
 	github.com/jonboulle/clockwork v0.4.0 // indirect
-	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.11.1 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect

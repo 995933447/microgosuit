@@ -18,6 +18,7 @@ func NewBuilder(ctx context.Context, resolveSchema string) (resolver.Builder, er
 
 	builder := &Builder{
 		srvNameToResolversMap: map[string]*elemutil.LinkedList{},
+		resolveSchema:         resolveSchema,
 	}
 
 	discover.OnSrvUpdated(func(ctx context.Context, evt discovery.Evt, srv *discovery.Service) {

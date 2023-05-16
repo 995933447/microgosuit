@@ -3,4 +3,4 @@
 
 package env
 
-const defaultCfgFilePath = "C:\\jjyz\\meta.json"
+const defaultCfgFilePath = "C:\\micro\\meta.json"

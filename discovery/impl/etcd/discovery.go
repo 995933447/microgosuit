@@ -13,8 +13,6 @@ import (
 	"time"
 )
 
-const KeyPrefix = "jjyzsrv_"
-
 type Service struct {
 	*discovery.Service
 	version int64
@@ -27,9 +25,9 @@ type Discovery struct {
 	srvMap        map[string]*Service
 	mu            sync.RWMutex
 	onSrvUpdate   discovery.OnSrvUpdatedFunc
-	unwatchSignCh chan struct {
-	}
-	isWatched bool
+	unwatchSignCh chan struct{}
+	KeyPrefix     string
+	isWatched     bool
 }
 
 func (d *Discovery) Unwatch() {
@@ -108,7 +106,7 @@ func (d *Discovery) Unregister(ctx context.Context, srvName string, node *discov
 }
 
 func (d *Discovery) srvNameToEtcdKey(srvName string) string {
-	return KeyPrefix + srvName
+	return d.KeyPrefix + srvName
 }
 
 func (d *Discovery) UnregisterAll(ctx context.Context, srvName string) error {
@@ -142,7 +140,7 @@ func (d *Discovery) watch() {
 	d.isWatched = true
 	d.mu.Unlock()
 
-	evtCh := d.etcd.Watch(context.Background(), KeyPrefix, clientv3.WithPrefix())
+	evtCh := d.etcd.Watch(context.Background(), d.KeyPrefix, clientv3.WithPrefix())
 	for {
 		select {
 		case <-d.unwatchSignCh:
@@ -150,11 +148,11 @@ func (d *Discovery) watch() {
 		case resp := <-evtCh:
 			for _, evt := range resp.Events {
 				key := string(evt.Kv.Key)
-				if !strings.HasPrefix(key, KeyPrefix) {
+				if !strings.HasPrefix(key, d.KeyPrefix) {
 					continue
 				}
 
-				srvName := key[len(KeyPrefix):]
+				srvName := key[len(d.KeyPrefix):]
 
 				d.mu.Lock()
 				oneSrvMu := d.MakeOrGetOpOneSrvMu(srvName)
@@ -288,7 +286,7 @@ func (d *Discovery) LoadAll(ctx context.Context) ([]*discovery.Service, error) {
 		defer cancel()
 	}
 
-	resp, err := d.etcd.Get(ctx, KeyPrefix, clientv3.WithPrefix())
+	resp, err := d.etcd.Get(ctx, d.KeyPrefix, clientv3.WithPrefix())
 	if err != nil {
 		return nil, err
 	}
@@ -296,11 +294,11 @@ func (d *Discovery) LoadAll(ctx context.Context) ([]*discovery.Service, error) {
 	var services []*discovery.Service
 	for _, kv := range resp.Kvs {
 		key := string(kv.Key)
-		if !strings.HasPrefix(key, KeyPrefix) {
+		if !strings.HasPrefix(key, d.KeyPrefix) {
 			continue
 		}
 
-		srvName := key[len(KeyPrefix):]
+		srvName := key[len(d.KeyPrefix):]
 
 		srv := &discovery.Service{}
 		err = json.Unmarshal(kv.Value, srv)
@@ -419,8 +417,9 @@ func (d *Discovery) atomicPersistSrv(ctx context.Context, srvName string, versio
 
 var _ discovery.Discovery = (*Discovery)(nil)
 
-func NewDiscovery(timeout time.Duration, etcdCfg clientv3.Config) (discovery.Discovery, error) {
+func NewDiscovery(keyPrefix string, timeout time.Duration, etcdCfg clientv3.Config) (discovery.Discovery, error) {
 	discover := &Discovery{
+		KeyPrefix:     keyPrefix,
 		timeout:       timeout,
 		srvMap:        map[string]*Service{},
 		unwatchSignCh: make(chan struct{}),

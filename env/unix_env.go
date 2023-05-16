@@ -3,4 +3,4 @@
 
 package env
 
-const defaultCfgFilePath = "/etc/jjyz/meta.json"
+const defaultCfgFilePath = "/etc/micro/meta.json"

@@ -12,7 +12,7 @@ import (
 )
 
 func TestFileCacheDiscovery(t *testing.T) {
-	conn, err := etcd.NewDiscovery(time.Hour, clientv3.Config{
+	conn, err := etcd.NewDiscovery("", time.Hour, clientv3.Config{
 		Endpoints: []string{
 			"127.0.0.1:12379",
 		},
@@ -93,7 +93,7 @@ func TestFileCacheDiscovery(t *testing.T) {
 }
 
 func TestEtcdDiscovery(t *testing.T) {
-	discover, err := etcd.NewDiscovery(time.Hour, clientv3.Config{
+	discover, err := etcd.NewDiscovery("", time.Hour, clientv3.Config{
 		Endpoints: []string{
 			"127.0.0.1:12379",
 		},

@@ -1,19 +1,19 @@
 package util
 
 import (
-	"github.com/gzjjyz/srvlib/lock"
+	"github.com/995933447/runtimeutil"
 )
 
 type SpecSrvMuFactory struct {
-	*lock.MulElemMuFactory
+	*runtimeutil.MulElemMuFactory
 }
 
 func NewSpecSrvMuFactory() *SpecSrvMuFactory {
 	return &SpecSrvMuFactory{
-		MulElemMuFactory: lock.NewMulElemMuFactory(),
+		MulElemMuFactory: runtimeutil.NewMulElemMuFactory(),
 	}
 }
 
-func (m *SpecSrvMuFactory) MakeOrGetOpOneSrvMu(srvName string) *lock.WithUsageMu {
+func (m *SpecSrvMuFactory) MakeOrGetOpOneSrvMu(srvName string) *runtimeutil.WithUsageMu {
 	return m.MakeOrGetSpecElemMu(srvName)
 }

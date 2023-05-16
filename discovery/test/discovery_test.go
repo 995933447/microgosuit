@@ -6,7 +6,7 @@ import (
 	"github.com/995933447/microgosuit/discovery"
 	"github.com/995933447/microgosuit/discovery/impl/etcd"
 	"github.com/995933447/microgosuit/discovery/impl/filecachedproxy"
-	"github.com/etcd-io/etcd/clientv3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"testing"
 	"time"
 )

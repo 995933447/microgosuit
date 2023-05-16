@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/995933447/microgosuit/discovery"
 	"github.com/995933447/microgosuit/discovery/util"
-	"github.com/etcd-io/etcd/clientv3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"strings"
 	"sync"
 	"time"
@@ -27,8 +27,9 @@ type Discovery struct {
 	srvMap        map[string]*Service
 	mu            sync.RWMutex
 	onSrvUpdate   discovery.OnSrvUpdatedFunc
-	unwatchSignCh chan struct{}
-	isWatched     bool
+	unwatchSignCh chan struct {
+	}
+	isWatched bool
 }
 
 func (d *Discovery) Unwatch() {

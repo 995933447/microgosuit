@@ -3,8 +3,8 @@ package test
 import (
 	"context"
 	"fmt"
-	"github.com/etcd-io/etcd/clientv3"
-	"github.com/etcd-io/etcd/mvcc/mvccpb"
+	"go.etcd.io/etcd/api/v3/mvccpb"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"strconv"
 	"testing"
 	"time"

@@ -6,7 +6,6 @@ import (
 	"github.com/995933447/microgosuit/discovery/impl/etcd"
 	"github.com/995933447/microgosuit/discovery/impl/filecachedproxy"
 	"github.com/995933447/microgosuit/env"
-	"github.com/etcd-io/etcd/clientv3"
 	"sync"
 	"time"
 )
@@ -19,7 +18,7 @@ var (
 func NewSpecDiscovery(discoveryName string) (discovery.Discovery, error) {
 	switch discoveryName {
 	case env.DiscoveryEtcd:
-		return etcd.NewDiscovery(time.Second*5, clientv3.Config{
+		return etcd.NewDiscovery(time.Second*5, client/v3.Config{
 			Endpoints:   env.MustMeta().Etcd.Endpoints,
 			DialTimeout: time.Duration(env.MustMeta().Etcd.ConnectTimeoutMs) * time.Millisecond,
 		})
@@ -45,7 +44,7 @@ func GetOrMakeDiscovery() (discovery.Discovery, error) {
 	makeNotProxyDiscovery := func(discoveryName string) (discovery.Discovery, error) {
 		switch discoveryName {
 		case env.DiscoveryEtcd:
-			return etcd.NewDiscovery(time.Second*5, clientv3.Config{
+			return etcd.NewDiscovery(time.Second*5, client/v3.Config{
 				Endpoints:   env.MustMeta().Etcd.Endpoints,
 				DialTimeout: time.Duration(env.MustMeta().Etcd.ConnectTimeoutMs) * time.Millisecond,
 			})

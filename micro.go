@@ -37,6 +37,7 @@ type ServeGrpcReq struct {
 	BeforeRegDiscover               func(discovery.Discovery, *discovery.Node) error
 	AfterRegDiscover                func(discovery.Discovery, *discovery.Node) error
 	EnabledHealth                   bool
+	SrvOpts                         []grpc.ServerOption
 }
 
 func ServeGrpc(ctx context.Context, req *ServeGrpcReq) error {
@@ -61,7 +62,7 @@ func ServeGrpc(ctx context.Context, req *ServeGrpcReq) error {
 	}
 
 	node := discovery.NewNode(ip, req.Port)
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(req.SrvOpts...)
 	if req.RegisterCustomServiceServerFunc != nil {
 		if err = req.RegisterCustomServiceServerFunc(grpcServer); err != nil {
 			return err

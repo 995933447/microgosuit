@@ -7,6 +7,7 @@ import (
 	"github.com/995933447/microgosuit/grpcsuit/handler/health"
 	"github.com/995933447/microgosuit/log"
 	"google.golang.org/grpc"
+	"sync/atomic"
 	"time"
 )
 
@@ -29,6 +30,8 @@ type HealthChecker struct {
 	discovery.Discovery
 	checkWorkerPoolSize uint32
 	checkIntervalMs     uint32
+	isPaused            atomic.Bool
+	isExited            atomic.Bool
 }
 
 func (h *HealthChecker) ResetCheckWorkerPoolSize(size uint32) {
@@ -39,38 +42,88 @@ func (h *HealthChecker) ResetCheckIntervalMs(ms uint32) {
 	h.checkIntervalMs = ms
 }
 
+func (h *HealthChecker) Exit() {
+	h.isExited.Store(true)
+}
+
+func (h *HealthChecker) Pause() {
+	h.isPaused.Store(true)
+}
+
+func (h *HealthChecker) Resume() {
+	h.isPaused.Store(false)
+}
+
 func (h *HealthChecker) Run() {
 	nodeCh := make(chan *Node)
 	exitCh := make(chan struct{})
-	for {
-		var oldWorkerPoolSize uint32
+	go func() {
 		for {
-			workerPoolSize := h.checkWorkerPoolSize
-			if workerPoolSize == 0 {
-				workerPoolSize = checkWorkerPoolSize
-			}
-
-			if workerPoolSize == oldWorkerPoolSize {
-				continue
-			}
-
-			expandWorkerNum := int32(workerPoolSize) - int32(oldWorkerPoolSize)
-			if expandWorkerNum > 0 {
-				for i := int32(0); i < expandWorkerNum; i++ {
-					h.work(nodeCh, exitCh)
+			var oldWorkerPoolSize uint32
+			for {
+				if h.isExited.Load() {
+					return
 				}
-			}
 
-			if expandWorkerNum < 0 {
-				for i := expandWorkerNum; i < 0; i++ {
-					exitCh <- struct{}{}
+				workerPoolSize := h.checkWorkerPoolSize
+				if workerPoolSize == 0 {
+					workerPoolSize = checkWorkerPoolSize
 				}
+
+				if workerPoolSize == oldWorkerPoolSize {
+					continue
+				}
+
+				expandWorkerNum := int32(workerPoolSize) - int32(oldWorkerPoolSize)
+				if expandWorkerNum > 0 {
+					for i := int32(0); i < expandWorkerNum; i++ {
+						h.work(nodeCh, exitCh)
+					}
+				}
+
+				if expandWorkerNum < 0 {
+					for i := expandWorkerNum; i < 0; i++ {
+						exitCh <- struct{}{}
+					}
+				}
+
+				oldWorkerPoolSize = workerPoolSize
+
+				time.Sleep(time.Millisecond * time.Duration(h.checkIntervalMs))
 			}
-
-			oldWorkerPoolSize = workerPoolSize
-
-			time.Sleep(time.Millisecond * time.Duration(h.checkIntervalMs))
 		}
+	}()
+
+	for {
+		if h.isExited.Load() {
+			return
+		}
+
+		if !h.isPaused.Load() {
+			sleepMs := 10000
+			if h.checkIntervalMs < 1000 {
+				sleepMs = int(h.checkIntervalMs)
+			}
+			time.Sleep(time.Millisecond * time.Duration(sleepMs))
+			continue
+		}
+
+		services, err := h.Discovery.LoadAll(context.Background())
+		if err != nil {
+			time.Sleep(time.Second * 3)
+			continue
+		}
+
+		for _, srv := range services {
+			for _, node := range srv.Nodes {
+				nodeCh <- &Node{
+					srvName: srv.SrvName,
+					detail:  node,
+				}
+			}
+		}
+
+		time.Sleep(time.Millisecond * time.Duration(h.checkIntervalMs))
 	}
 }
 

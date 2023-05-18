@@ -2,16 +2,14 @@ package micro
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"github.com/995933447/gonetutil"
 	"github.com/995933447/microgosuit/discovery"
 	"github.com/995933447/microgosuit/env"
 	"github.com/995933447/microgosuit/factory"
 	"github.com/995933447/microgosuit/grpcsuit"
+	"github.com/995933447/microgosuit/grpcsuit/handler/health"
 	"github.com/995933447/microgosuit/log"
-	"github.com/gzjjyz/srvlib/handler/grpchandler"
-	"github.com/gzjjyz/srvlib/pb3/health"
-	"github.com/gzjjyz/srvlib/utils"
 	"google.golang.org/grpc"
 	"net"
 	"net/http"
@@ -44,7 +42,7 @@ type ServeGrpcReq struct {
 func ServeGrpc(ctx context.Context, req *ServeGrpcReq) error {
 	if req.PProfIpVar != "" && req.PProfPort > 0 {
 		go func() {
-			ip, err := utils.EvalVarToParseIp(req.PProfIpVar)
+			ip, err := gonetutil.EvalVarToParseIp(req.PProfIpVar)
 			if err != nil {
 				log.Logger.Error(nil, err)
 				return
@@ -57,19 +55,12 @@ func ServeGrpc(ctx context.Context, req *ServeGrpcReq) error {
 		}()
 	}
 
-	ip, err := utils.EvalVarToParseIp(req.IpVar)
-	if err != nil {
-		return err
-	}
-
-	nodeExtra, err := json.Marshal(&health.NodeHealthDesc{})
+	ip, err := gonetutil.EvalVarToParseIp(req.IpVar)
 	if err != nil {
 		return err
 	}
 
 	node := discovery.NewNode(ip, req.Port)
-	node.Extra = string(nodeExtra)
-
 	grpcServer := grpc.NewServer()
 	if req.RegisterCustomServiceServerFunc != nil {
 		if err = req.RegisterCustomServiceServerFunc(grpcServer); err != nil {
@@ -78,7 +69,7 @@ func ServeGrpc(ctx context.Context, req *ServeGrpcReq) error {
 	}
 
 	if req.EnabledHealth {
-		health.RegisterHealthServer(grpcServer, &grpchandler.Health{})
+		health.RegisterHealthReporterServer(grpcServer, &health.Reporter{})
 	}
 
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", ip, req.Port))

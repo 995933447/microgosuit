@@ -15,15 +15,16 @@ import (
 	"time"
 )
 
-func NewProxy() (*Proxy, error) {
-	discover, err := factory.NewSpecDiscovery(env.MustMeta().DiscoveryProxy.Conn)
+func NewProxy(discoverKeyPrefix string) (*Proxy, error) {
+	discover, err := factory.NewSpecDiscovery(discoverKeyPrefix, env.MustMeta().DiscoveryProxy.Conn)
 	if err != nil {
 		return nil, err
 	}
 
 	proxy := &Proxy{
-		dir:      env.MustMeta().DiscoveryProxy.Dir,
-		discover: discover,
+		dir:               env.MustMeta().DiscoveryProxy.Dir,
+		discover:          discover,
+		discoverKeyPrefix: discoverKeyPrefix,
 	}
 
 	go func() {
@@ -99,7 +100,7 @@ func watchCfg(proxy *Proxy) {
 				}
 			}
 
-			discover, err := factory.GetOrMakeDiscovery()
+			discover, err := factory.GetOrMakeDiscovery(proxy.discoverKeyPrefix)
 			if err != nil {
 				log.Logger.Error(nil, err)
 				continue
@@ -124,8 +125,9 @@ func watchCfg(proxy *Proxy) {
 }
 
 type Proxy struct {
-	dir      string
-	discover discovery.Discovery
+	dir               string
+	discover          discovery.Discovery
+	discoverKeyPrefix string
 
 	mu                sync.RWMutex
 	isExited          bool

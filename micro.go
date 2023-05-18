@@ -28,6 +28,7 @@ func InitSuitWithGrpc(ctx context.Context, metaFilePath, resolveSchema string) e
 }
 
 type ServeGrpcReq struct {
+	RegDiscoverKeyPrefix            string
 	SrvName                         string
 	IpVar                           string
 	Port                            int
@@ -78,7 +79,7 @@ func ServeGrpc(ctx context.Context, req *ServeGrpcReq) error {
 		return err
 	}
 
-	discover, err := factory.GetOrMakeDiscovery()
+	discover, err := factory.GetOrMakeDiscovery(req.RegDiscoverKeyPrefix)
 	if err != nil {
 		return err
 	}

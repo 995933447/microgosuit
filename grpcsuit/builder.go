@@ -10,8 +10,8 @@ import (
 	"sync"
 )
 
-func NewBuilder(ctx context.Context, resolveSchema string) (resolver.Builder, error) {
-	discover, err := factory.GetOrMakeDiscovery()
+func NewBuilder(ctx context.Context, resolveSchema, discoverKeyPrefix string) (resolver.Builder, error) {
+	discover, err := factory.GetOrMakeDiscovery(discoverKeyPrefix)
 	if err != nil {
 		return nil, err
 	}

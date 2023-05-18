@@ -48,9 +48,8 @@ func (m *Meta) IsProd() bool {
 }
 
 var (
-	meta        *Meta
-	hasInitMeta bool
-	initMetaMu  sync.RWMutex
+	meta       *Meta
+	initMetaMu sync.RWMutex
 )
 
 func InitMeta(cfgFilePath string) error {
@@ -58,14 +57,17 @@ func InitMeta(cfgFilePath string) error {
 		cfgFilePath = defaultCfgFilePath
 	}
 
-	if hasInitMeta {
+	initMetaMu.RLock()
+	if meta != nil {
+		initMetaMu.RUnlock()
 		return nil
 	}
+	initMetaMu.RUnlock()
 
 	initMetaMu.Lock()
 	defer initMetaMu.Unlock()
 
-	if hasInitMeta {
+	if meta != nil {
 		return nil
 	}
 
@@ -74,8 +76,6 @@ func InitMeta(cfgFilePath string) error {
 	if err := cfgLoader.Load(); err != nil {
 		return err
 	}
-
-	hasInitMeta = true
 
 	watchMetaErrCh := make(chan error)
 	go cfgLoader.WatchToLoad(watchMetaErrCh)
@@ -92,7 +92,7 @@ func InitMeta(cfgFilePath string) error {
 }
 
 func MustMeta() *Meta {
-	if !hasInitMeta {
+	if meta == nil {
 		panic("meta not init")
 	}
 

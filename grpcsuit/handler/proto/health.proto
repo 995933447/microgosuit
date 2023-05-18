@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package api;
+option go_package = "github.com/995933447/microgosuit/handler/health";
+
+service HealthReporter {
+  rpc Ping(PingReq) returns (PingResp) {}
+}
+
+message PingReq {
+}
+
+message PingResp {
+}

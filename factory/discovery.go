@@ -16,6 +16,8 @@ var (
 	initDiscoveryMu sync.RWMutex
 )
 
+var CustomMakeDiscoveryFunc func(discoveryName string) (discovery.Discovery, error)
+
 func NewSpecDiscovery(discoveryName string) (discovery.Discovery, error) {
 	switch discoveryName {
 	case env.DiscoveryEtcd:
@@ -23,6 +25,10 @@ func NewSpecDiscovery(discoveryName string) (discovery.Discovery, error) {
 			Endpoints:   env.MustMeta().Etcd.Endpoints,
 			DialTimeout: time.Duration(env.MustMeta().Etcd.ConnectTimeoutMs) * time.Millisecond,
 		})
+	default:
+		if CustomMakeDiscoveryFunc != nil {
+			return CustomMakeDiscoveryFunc(discoveryName)
+		}
 	}
 	return nil, fmt.Errorf("no support discovery type(%s)", discoveryName)
 }
@@ -42,27 +48,16 @@ func GetOrMakeDiscovery() (discovery.Discovery, error) {
 		return discover, nil
 	}
 
-	makeNotProxyDiscovery := func(discoveryName string) (discovery.Discovery, error) {
-		switch discoveryName {
-		case env.DiscoveryEtcd:
-			return etcd.NewDiscovery("", time.Second*5, clientv3.Config{
-				Endpoints:   env.MustMeta().Etcd.Endpoints,
-				DialTimeout: time.Duration(env.MustMeta().Etcd.ConnectTimeoutMs) * time.Millisecond,
-			})
-		}
-		return nil, fmt.Errorf("no support discovery type(%s)", discoveryName)
-	}
-
 	var err error
 	if env.MustMeta().Discovery != env.DiscoveryFileCacheProxy {
-		discover, err = makeNotProxyDiscovery(env.MustMeta().Discovery)
+		discover, err = NewSpecDiscovery(env.MustMeta().Discovery)
 		if err != nil {
 			return nil, err
 		}
 		return discover, nil
 	}
 
-	conn, err := makeNotProxyDiscovery(env.MustMeta().DiscoveryProxy.Conn)
+	conn, err := NewSpecDiscovery(env.MustMeta().DiscoveryProxy.Conn)
 	if err != nil {
 		return nil, err
 	}

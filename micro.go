@@ -15,12 +15,12 @@ import (
 	"net/http"
 )
 
-func InitSuitWithGrpc(ctx context.Context, metaFilePath, resolveSchema string) error {
+func InitSuitWithGrpc(ctx context.Context, metaFilePath, resolveSchema, discoverPrefix string) error {
 	if err := env.InitMeta(metaFilePath); err != nil {
 		return err
 	}
 
-	if err := grpcsuit.InitGrpcResolver(ctx, resolveSchema); err != nil {
+	if err := grpcsuit.InitGrpcResolver(ctx, resolveSchema, discoverPrefix); err != nil {
 		return err
 	}
 

@@ -20,8 +20,8 @@ var NotRoundRobinDialOpts = []grpc.DialOption{
 
 var customDoOnDiscoverSrvUpdated discovery.OnSrvUpdatedFunc = func(ctx context.Context, evt discovery.Evt, srv *discovery.Service) {}
 
-func InitGrpcResolver(ctx context.Context, resolveSchema string) error {
-	builder, err := NewBuilder(ctx, resolveSchema)
+func InitGrpcResolver(ctx context.Context, resolveSchema, discoverPrefix string) error {
+	builder, err := NewBuilder(ctx, resolveSchema, discoverPrefix)
 	if err != nil {
 		return err
 	}

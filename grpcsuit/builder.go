@@ -5,7 +5,6 @@ import (
 	"github.com/995933447/elemutil"
 	"github.com/995933447/microgosuit/discovery"
 	"github.com/995933447/microgosuit/factory"
-	"github.com/gzjjyz/srvlib/alg/doublelinked"
 	"google.golang.org/grpc/resolver"
 	"sync"
 )
@@ -74,9 +73,7 @@ func (b *Builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		resolvers = &elemutil.LinkedList{}
 		b.srvNameToResolversMap[srvName] = resolvers
 	}
-	resolvers.Append(&doublelinked.LinkedNode{
-		Payload: resolve,
-	})
+	resolvers.Append(resolve)
 
 	return resolve, nil
 }

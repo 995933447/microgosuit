@@ -55,7 +55,7 @@ type Builder struct {
 }
 
 func (b *Builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
-	srvName := target.Endpoint
+	srvName := target.Endpoint()
 
 	srv, err := b.discover.Discover(context.Background(), srvName)
 	if err != nil {

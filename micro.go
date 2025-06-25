@@ -11,6 +11,7 @@ import (
 	"github.com/995933447/microgosuit/grpcsuit/handler/health"
 	"github.com/995933447/microgosuit/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"net"
 	"net/http"
 )
@@ -69,6 +70,8 @@ func ServeGrpc(ctx context.Context, req *ServeGrpcReq) error {
 			return err
 		}
 	}
+
+	reflection.Register(grpcServer)
 
 	if req.EnabledHealth {
 		health.RegisterHealthReporterServer(grpcServer, &health.Reporter{})

@@ -6,26 +6,34 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-func NewRpcErrWithMsg(err protoreflect.Enum, errMsg string) error {
+func newErrFromEnumWithMsg(err protoreflect.Enum, errMsg string) error {
 	if errMsg == "" {
 		errMsg = string(err.Descriptor().Values().ByNumber(err.Number()).Name())
 	}
 	return status.Errorf(codes.Code(err.Number()), errMsg)
 }
 
+func newErrFromEnum(err protoreflect.Enum) error {
+	return newErrFromEnumWithMsg(err, "")
+}
+
+func NewRpcErrWithMsg(err protoreflect.Enum, errMsg string) error {
+	return newErrFromEnumWithMsg(err, errMsg)
+}
+
 func NewRpcErr(err protoreflect.Enum) error {
-	return NewRpcErrWithMsg(err, "")
+	return newErrFromEnum(err)
 }
 
 func IsUnknownError(err error) bool {
 	code := GetRpcErrCode(err)
-	return code == int32(codes.Unknown) || code == -1
+	return code == protoreflect.EnumNumber(codes.Unknown) || code == -1
 }
 
-func GetRpcErrCode(err error) int32 {
+func GetRpcErrCode(err error) protoreflect.EnumNumber {
 	st, ok := status.FromError(err)
 	if ok {
-		return int32(st.Code())
+		return protoreflect.EnumNumber(st.Code())
 	}
 	return -1
 }

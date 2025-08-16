@@ -24,3 +24,19 @@ func NewRpcErr(err protoreflect.Enum) error {
 func NewRpcErrWithMsg(err protoreflect.Enum, msg string) error {
 	return NewErrFromEnumWithMsg(err, msg)
 }
+
+func GetRpcErrCode(err error) int32 {
+	st, ok := status.FromError(err)
+	if ok {
+		return int32(st.Code())
+	}
+	return -1
+}
+
+func GetRpcErrMsg(err error) string {
+	st, ok := status.FromError(err)
+	if ok {
+		return st.Message()
+	}
+	return err.Error()
+}

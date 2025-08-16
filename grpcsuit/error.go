@@ -6,6 +6,8 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
+const ErrCodeUnknown = -1
+
 func newErrFromEnumWithMsg(err protoreflect.Enum, errMsg string) error {
 	if errMsg == "" {
 		errMsg = string(err.Descriptor().Values().ByNumber(err.Number()).Name())
@@ -35,7 +37,7 @@ func GetRpcErrCode(err error) protoreflect.EnumNumber {
 	if ok {
 		return protoreflect.EnumNumber(st.Code())
 	}
-	return -1
+	return ErrCodeUnknown
 }
 
 func GetRpcErrMsg(err error) string {

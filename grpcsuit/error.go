@@ -6,21 +6,21 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-func NewErrEnumWithMsg(err protoreflect.Enum, errMsg string) error {
+func NewErrFromEnumWithMsg(err protoreflect.Enum, errMsg string) error {
 	if errMsg == "" {
 		errMsg = string(err.Descriptor().Values().ByNumber(err.Number()).Name())
 	}
 	return status.Errorf(codes.Code(err.Number()), errMsg)
 }
 
-func NewErrEnum(err protoreflect.Enum) error {
-	return NewErrEnumWithMsg(err, "")
+func NewErrFromEnum(err protoreflect.Enum) error {
+	return NewErrFromEnumWithMsg(err, "")
 }
 
 func NewRpcErr(err protoreflect.Enum) error {
-	return NewErrEnum(err)
+	return NewErrFromEnum(err)
 }
 
 func NewRpcErrWithMsg(err protoreflect.Enum, msg string) error {
-	return NewErrEnumWithMsg(err, msg)
+	return NewErrFromEnumWithMsg(err, msg)
 }

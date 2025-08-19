@@ -3,6 +3,9 @@ package microgosuit
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/http"
+
 	"github.com/995933447/gonetutil"
 	"github.com/995933447/microgosuit/discovery"
 	"github.com/995933447/microgosuit/env"
@@ -12,8 +15,6 @@ import (
 	"github.com/995933447/microgosuit/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"net"
-	"net/http"
 )
 
 func InitSuitWithGrpc(ctx context.Context, metaFilePath, resolveSchema, discoverPrefix string) error {
@@ -38,6 +39,7 @@ type ServeGrpcReq struct {
 	RegisterCustomServiceServerFunc func(*grpc.Server) error
 	BeforeRegDiscover               func(discovery.Discovery, *discovery.Node) error
 	AfterRegDiscover                func(discovery.Discovery, *discovery.Node) error
+	OnReady                         func(*grpc.Server)
 	EnabledHealth                   bool
 	SrvOpts                         []grpc.ServerOption
 }
@@ -110,6 +112,10 @@ func ServeGrpc(ctx context.Context, req *ServeGrpcReq) error {
 			log.Logger.Error(ctx, err)
 		}
 	}()
+
+	if req.OnReady != nil {
+		req.OnReady(grpcServer)
+	}
 
 	err = grpcServer.Serve(listener)
 	if err != nil {

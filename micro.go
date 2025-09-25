@@ -31,7 +31,8 @@ func InitSuitWithGrpc(ctx context.Context, metaFilePath, resolveSchema, discover
 
 type ServeGrpcReq struct {
 	RegDiscoverKeyPrefix            string
-	SrvName                         string
+	SrvName                         string // Deprecated: please use field SrvNames
+	SrvNames                        []string
 	IpVar                           string
 	Port                            int
 	PProfIpVar                      string
@@ -95,9 +96,18 @@ func ServeGrpc(ctx context.Context, req *ServeGrpcReq) error {
 		}
 	}
 
-	err = discover.Register(ctx, req.SrvName, node)
-	if err != nil {
-		return err
+	if len(req.SrvNames) > 0 {
+		for _, srvName := range req.SrvNames {
+			err = discover.Register(ctx, srvName, node)
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		err = discover.Register(ctx, req.SrvName, node)
+		if err != nil {
+			return err
+		}
 	}
 
 	if req.AfterRegDiscover != nil {
@@ -107,9 +117,18 @@ func ServeGrpc(ctx context.Context, req *ServeGrpcReq) error {
 	}
 
 	defer func() {
-		err = discover.Unregister(ctx, req.SrvName, node, true)
-		if err != nil {
-			log.Logger.Error(ctx, err)
+		if len(req.SrvNames) > 0 {
+			for _, srvName := range req.SrvNames {
+				err = discover.Unregister(ctx, srvName, node, true)
+				if err != nil {
+					log.Logger.Error(ctx, err)
+				}
+			}
+		} else {
+			err = discover.Unregister(ctx, req.SrvName, node, true)
+			if err != nil {
+				log.Logger.Error(ctx, err)
+			}
 		}
 	}()
 

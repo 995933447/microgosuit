@@ -69,7 +69,7 @@ package main
 import "github.com/995933447/microgosuit"
 
 func init() {
-	microgosuit.SetModuleName("user")
+	microgosuit.SetModuleName("{{.ServiceNamespace}}")
 }
 
 var ServiceNames = []string{

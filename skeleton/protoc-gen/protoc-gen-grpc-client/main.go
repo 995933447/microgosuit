@@ -77,13 +77,13 @@ func main() {
 
 	for _, f := range plugin.Files {
 		if !f.Generate {
-			log.Printf("microgosuit gen-grpc-server, skipped gen %s\n", string(f.Desc.Name()))
+			log.Printf("microgosuit gen-grpc-client, skipped gen %s\n", string(f.Desc.Name()))
 			continue
 		}
 
 		//  只生成有 Service 的 proto
 		if len(f.Services) == 0 {
-			log.Printf("microgosuit gen-grpc-server, skipped gen %s\n", string(f.Desc.Name()))
+			log.Printf("microgosuit gen-grpc-client, skipped gen %s\n", string(f.Desc.Name()))
 			continue
 		}
 

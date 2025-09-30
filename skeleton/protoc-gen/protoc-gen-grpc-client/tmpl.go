@@ -7,7 +7,9 @@ import (
 	"sync"
 
 	"github.com/995933447/microgosuit/grpcsuit"
-	"golang.org/x/net/context"
+	{{- if .ShouldImportContext }}
+	"context"
+	{{- end }}
 	"google.golang.org/grpc"
 )
 

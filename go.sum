@@ -8,6 +8,8 @@ github.com/995933447/gonetutil v0.0.0-20230517070832-763d0c3b1d7e h1:duIkST4HSqn
 github.com/995933447/gonetutil v0.0.0-20230517070832-763d0c3b1d7e/go.mod h1:ohT95zFKbutdw7BviBXkma82eZthx4tV6LXSexLQ3h4=
 github.com/995933447/gonetutil v0.0.0-20250926121248-923d02188278 h1:DTVmRyBVmCxLr5EfgQsccyw3eFqfLrlJRvNp8uTnbN8=
 github.com/995933447/gonetutil v0.0.0-20250926121248-923d02188278/go.mod h1:ohT95zFKbutdw7BviBXkma82eZthx4tV6LXSexLQ3h4=
+github.com/995933447/gonetutil v0.0.0-20250930112637-8f898353708c h1:MakgDuw3NoCf3OfleuCchPfBNgShllLjSVgWCMJb4h4=
+github.com/995933447/gonetutil v0.0.0-20250930112637-8f898353708c/go.mod h1:ohT95zFKbutdw7BviBXkma82eZthx4tV6LXSexLQ3h4=
 github.com/995933447/log-go v0.0.0-20230420123341-5d684963433b h1:mMs9jXdhcSpesQpg4S7pFpBGG2cYvF6xcCyqdjbQmI4=
 github.com/995933447/log-go v0.0.0-20230420123341-5d684963433b/go.mod h1:8nYLjLQ598TrCziO2tAADhEFlNxySV+9phaQBzCaSZo=
 github.com/995933447/reflectutil v0.0.0-20220816152525-eaa34e263589 h1:OCJ+gSk/+q9O/C3Q4RLK5d7LmHwOhCHC7aTgT3TgnoI=

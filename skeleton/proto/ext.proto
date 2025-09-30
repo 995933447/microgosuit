@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package ext;
+option go_package = "github.com/995933447/microgosuit/skeleton/pb";
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.MethodOptions {
+  HttpProxyAccessRule http_proxy_access_rule = 66001;
+}
+
+message HttpProxyAccessRule {
+  string method = 1;
+  bool no_auth = 2;
+}
+
+extend google.protobuf.EnumOptions {
+  bool is_rpc_port = 66001;
+}

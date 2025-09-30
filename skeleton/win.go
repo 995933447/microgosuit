@@ -1,6 +1,6 @@
-//go:build !windows
-// +build !windows
+//go:build windows
+// +build windows
 
 package skeleton
 
-const defaultProtocGenCfgFilePath = "/etc/microgosuit/skeleton/conf.json"
+const defaultProtocGenCfgFilePath = "c:\\microgosuit\\skeleton\\conf.json"

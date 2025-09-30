@@ -2,11 +2,12 @@ package grpcsuit
 
 import (
 	"context"
+	"sync"
+
 	"github.com/995933447/elemutil"
 	"github.com/995933447/microgosuit/discovery"
 	"github.com/995933447/microgosuit/factory"
 	"google.golang.org/grpc/resolver"
-	"sync"
 )
 
 func NewBuilder(ctx context.Context, resolveSchema, discoverKeyPrefix string) (resolver.Builder, error) {

@@ -17,6 +17,16 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+var moduleName string
+
+func SetModuleName(name string) {
+	moduleName = name
+}
+
+func GetModuleName() string {
+	return moduleName
+}
+
 func InitSuitWithGrpc(ctx context.Context, metaFilePath, resolveSchema, discoverPrefix string) error {
 	if err := env.InitMeta(metaFilePath); err != nil {
 		return err
@@ -40,7 +50,7 @@ type ServeGrpcReq struct {
 	RegisterCustomServiceServerFunc func(*grpc.Server) error
 	BeforeRegDiscover               func(discovery.Discovery, *discovery.Node) error
 	AfterRegDiscover                func(discovery.Discovery, *discovery.Node) error
-	OnReady                         func(*grpc.Server)
+	OnReady                         func(*grpc.Server, *discovery.Node)
 	EnabledHealth                   bool
 	SrvOpts                         []grpc.ServerOption
 }
@@ -133,7 +143,7 @@ func ServeGrpc(ctx context.Context, req *ServeGrpcReq) error {
 	}()
 
 	if req.OnReady != nil {
-		req.OnReady(grpcServer)
+		req.OnReady(grpcServer, node)
 	}
 
 	err = grpcServer.Serve(listener)

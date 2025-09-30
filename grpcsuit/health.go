@@ -3,12 +3,13 @@ package grpcsuit
 import (
 	"context"
 	"fmt"
+	"sync/atomic"
+	"time"
+
 	"github.com/995933447/microgosuit/discovery"
 	"github.com/995933447/microgosuit/grpcsuit/handler/health"
 	"github.com/995933447/microgosuit/log"
 	"google.golang.org/grpc"
-	"sync/atomic"
-	"time"
 )
 
 const checkWorkerPoolSize = 100
@@ -71,6 +72,7 @@ func (h *HealthChecker) Run() {
 				}
 
 				if workerPoolSize == oldWorkerPoolSize {
+					time.Sleep(time.Duration(h.checkIntervalMs) * time.Millisecond)
 					continue
 				}
 
@@ -99,7 +101,7 @@ func (h *HealthChecker) Run() {
 			return
 		}
 
-		if !h.isPaused.Load() {
+		if h.isPaused.Load() {
 			sleepMs := 10000
 			if h.checkIntervalMs < 1000 {
 				sleepMs = int(h.checkIntervalMs)
@@ -146,7 +148,7 @@ func (h *HealthChecker) work(nodeCh chan *Node, exitCh chan struct{}) {
 
 func (h *HealthChecker) check(node *Node) error {
 	doCheck := func() error {
-		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", node.detail.Host, node.detail.Port), NotRoundRobinDialOpts...)
+		conn, err := grpc.NewClient(fmt.Sprintf("%s:%d", node.detail.Host, node.detail.Port), NotRoundRobinDialOpts...)
 		if err != nil {
 			return err
 		}
@@ -158,6 +160,7 @@ func (h *HealthChecker) check(node *Node) error {
 
 		_, err = health.NewHealthReporterClient(conn).Ping(ctx, &health.PingReq{})
 		if err != nil {
+			log.Logger.Infof(nil, "grpc health check:%s fail %v", node.srvName, err)
 			return err
 		}
 
@@ -179,7 +182,7 @@ func (h *HealthChecker) check(node *Node) error {
 		return nil
 	}
 
-	err := h.Discovery.Unregister(context.Background(), node.srvName, node.detail, false)
+	err := h.Discovery.Unregister(context.Background(), node.srvName, node.detail, true)
 	if err != nil {
 		return err
 	}

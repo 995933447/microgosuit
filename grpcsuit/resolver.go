@@ -3,6 +3,7 @@ package grpcsuit
 import (
 	"context"
 	"fmt"
+
 	"github.com/995933447/microgosuit/discovery"
 	"github.com/995933447/microgosuit/log"
 	"google.golang.org/grpc/resolver"
@@ -42,6 +43,9 @@ func (r *Resolver) UpdateSrvCfg(srv *discovery.Service) {
 
 	state := resolver.State{}
 	for _, node := range srv.Nodes {
+		if !node.Available() {
+			continue
+		}
 		state.Addresses = append(state.Addresses, resolver.Address{
 			Addr: fmt.Sprintf("%s:%d", node.Host, node.Port),
 		})

@@ -105,7 +105,8 @@ func main() {
 }
 
 type rpcFileHeadTemplateSlot struct {
-	ServiceNamespace string
+	ServiceNamespace    string
+	ShouldImportContext bool
 }
 
 type rpcFileDefineServiceTemplateSlot struct {
@@ -131,9 +132,19 @@ func genClientSkeleton(plugin *protogen.Plugin, f *protogen.File) error {
 		return err
 	}
 
+	var shouldImportContext bool
+	for _, service := range f.Services {
+		if len(service.Methods) == 0 {
+			continue
+		}
+		shouldImportContext = true
+		break
+	}
+
 	var bb bytes.Buffer
 	err = tmpl.Execute(&bb, &rpcFileHeadTemplateSlot{
-		ServiceNamespace: string(f.Desc.Package()),
+		ServiceNamespace:    string(f.Desc.Package()),
+		ShouldImportContext: shouldImportContext,
 	})
 	if err != nil {
 		log.Println(runtimeutil.NewStackErr(err))

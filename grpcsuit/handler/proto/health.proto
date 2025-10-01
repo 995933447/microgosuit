@@ -8,7 +8,9 @@ service HealthReporter {
 }
 
 message PingReq {
+  string ping_service = 1;
 }
 
 message PingResp {
+  bool ok = 1;
 }

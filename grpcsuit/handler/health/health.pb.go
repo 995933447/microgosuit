@@ -23,6 +23,7 @@ const (
 
 type PingReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	PingService   string                 `protobuf:"bytes,1,opt,name=ping_service,json=pingService,proto3" json:"ping_service,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -57,8 +58,16 @@ func (*PingReq) Descriptor() ([]byte, []int) {
 	return file_health_proto_rawDescGZIP(), []int{0}
 }
 
+func (x *PingReq) GetPingService() string {
+	if x != nil {
+		return x.PingService
+	}
+	return ""
+}
+
 type PingResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ok            bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -93,14 +102,22 @@ func (*PingResp) Descriptor() ([]byte, []int) {
 	return file_health_proto_rawDescGZIP(), []int{1}
 }
 
+func (x *PingResp) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
 var File_health_proto protoreflect.FileDescriptor
 
 const file_health_proto_rawDesc = "" +
 	"\n" +
-	"\fhealth.proto\x12\x03api\"\t\n" +
-	"\aPingReq\"\n" +
-	"\n" +
-	"\bPingResp27\n" +
+	"\fhealth.proto\x12\x03api\",\n" +
+	"\aPingReq\x12!\n" +
+	"\fping_service\x18\x01 \x01(\tR\vpingService\"\x1a\n" +
+	"\bPingResp\x12\x0e\n" +
+	"\x02ok\x18\x01 \x01(\bR\x02ok27\n" +
 	"\x0eHealthReporter\x12%\n" +
 	"\x04Ping\x12\f.api.PingReq\x1a\r.api.PingResp\"\x00B1Z/github.com/995933447/microgosuit/handler/healthb\x06proto3"
 

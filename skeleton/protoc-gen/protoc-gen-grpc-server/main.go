@@ -123,16 +123,17 @@ type mainFileTemplateSlot struct {
 	GrpcResolveSchema       string
 	DiscoverPrefix          string
 	ServiceNamespace        string
-	ServiceImportPath       string
-	ServiceServerImportPath string
 	ServiceGoPackage        string
 	ServiceNames            []string
 	EnabledHealth           bool
+	ServiceServerImportPath string
 }
 
-type modNamesFileTemplateSlot struct {
-	ServiceNamespace string
-	ServiceNames     []string
+type modFileTemplateSlot struct {
+	ServiceNamespace        string
+	ServiceNames            []string
+	ServiceImportPath       string
+	ServiceServerImportPath string
 }
 
 type portFileTemplateSlot struct {
@@ -217,6 +218,8 @@ func genServerSkeleton(plugin *protogen.Plugin, f *protogen.File) error {
 		serviceNames = append(serviceNames, service.GoName)
 	}
 
+	serviceServerImportPath := path.Dir(string(f.GoImportPath)) + "/" + normalizeDirName(string(f.GoPackageName+"Server"))
+
 	// ========= 生成 main.go =========
 	svcMainFilePath := svcRootDirPath + "/main.go"
 	if _, err := os.Stat(svcMainFilePath); err != nil {
@@ -242,11 +245,10 @@ func genServerSkeleton(plugin *protogen.Plugin, f *protogen.File) error {
 			GrpcResolveSchema:       skeleton.MustGetProtocGenConf().GrpcResolveSchema,
 			DiscoverPrefix:          skeleton.MustGetProtocGenConf().DiscoverPrefix,
 			ServiceNamespace:        string(f.Desc.Package()),
-			ServiceImportPath:       string(f.GoImportPath),
-			ServiceServerImportPath: path.Dir(string(f.GoImportPath)) + "/" + normalizeDirName(string(f.GoPackageName+"Server")),
 			ServiceGoPackage:        string(f.GoPackageName),
 			ServiceNames:            serviceNames,
 			EnabledHealth:           skeleton.MustGetProtocGenConf().EnabledHealth,
+			ServiceServerImportPath: serviceServerImportPath,
 		})
 		if err != nil {
 			log.Println(runtimeutil.NewStackErr(err))
@@ -257,23 +259,25 @@ func genServerSkeleton(plugin *protogen.Plugin, f *protogen.File) error {
 	}
 
 	// ========= 生成 svc_name.go =========
-	modNamesFilePath := svcRootDirPath + "/mod_name.go"
-	modNamesFile, err := os.OpenFile(modNamesFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
+	modFilePath := svcRootDirPath + "/mod.go"
+	modFile, err := os.OpenFile(modFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		log.Println(runtimeutil.NewStackErr(err))
 		return err
 	}
-	defer modNamesFile.Close()
+	defer modFile.Close()
 
-	tmpl, err := template.New("modNamesFileTemplate").Parse(modNamesFileTemplate)
+	tmpl, err := template.New("modFileTemplate").Parse(modFileTemplate)
 	if err != nil {
 		log.Println(runtimeutil.NewStackErr(err))
 		return err
 	}
 
-	err = tmpl.Execute(modNamesFile, &modNamesFileTemplateSlot{
-		ServiceNamespace: string(f.GoPackageName),
-		ServiceNames:     serviceNames,
+	err = tmpl.Execute(modFile, &modFileTemplateSlot{
+		ServiceNamespace:        string(f.GoPackageName),
+		ServiceNames:            serviceNames,
+		ServiceImportPath:       string(f.GoImportPath),
+		ServiceServerImportPath: serviceServerImportPath,
 	})
 	if err != nil {
 		log.Println(runtimeutil.NewStackErr(err))

@@ -147,10 +147,10 @@ func (h *HealthChecker) work(nodeCh chan *Node, exitCh chan struct{}) {
 }
 
 func (h *HealthChecker) check(node *Node) error {
-	doCheck := func() error {
+	doCheck := func() (bool, error) {
 		conn, err := grpc.NewClient(fmt.Sprintf("%s:%d", node.detail.Host, node.detail.Port), NotRoundRobinDialOpts...)
 		if err != nil {
-			return err
+			return false, err
 		}
 
 		defer conn.Close()
@@ -158,24 +158,26 @@ func (h *HealthChecker) check(node *Node) error {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
 
-		_, err = health.NewHealthReporterClient(conn).Ping(ctx, &health.PingReq{})
+		resp, err := health.NewHealthReporterClient(conn).Ping(ctx, &health.PingReq{
+			PingService: node.srvName,
+		})
 		if err != nil {
 			log.Logger.Infof(nil, "grpc health check:%s fail %v", node.srvName, err)
-			return err
+			return false, err
 		}
 
-		return nil
+		return resp.Ok, nil
 	}
 
 	var alive bool
 	for retry := 0; retry < 3; retry++ {
-		if err := doCheck(); err != nil {
+		if ok, err := doCheck(); err != nil {
 			time.Sleep(5 * time.Second)
 			continue
+		} else {
+			alive = ok
+			break
 		}
-
-		alive = true
-		break
 	}
 
 	if alive {

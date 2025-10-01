@@ -86,8 +86,15 @@ func ServeGrpc(ctx context.Context, req *ServeGrpcReq) error {
 
 	reflection.Register(grpcServer)
 
+	var serviceNames []string
+	if len(req.SrvNames) > 0 {
+		serviceNames = req.SrvNames
+	} else {
+		serviceNames = append(serviceNames, req.SrvName)
+	}
+
 	if req.EnabledHealth {
-		health.RegisterHealthReporterServer(grpcServer, &health.Reporter{})
+		health.RegisterHealthReporterServer(grpcServer, health.NewReporter(serviceNames))
 	}
 
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", ip, req.Port))
@@ -106,41 +113,27 @@ func ServeGrpc(ctx context.Context, req *ServeGrpcReq) error {
 		}
 	}
 
-	if len(req.SrvNames) > 0 {
-		for _, srvName := range req.SrvNames {
-			err = discover.Register(ctx, srvName, node)
-			if err != nil {
-				return err
-			}
-		}
-	} else {
-		err = discover.Register(ctx, req.SrvName, node)
+	for _, serviceName := range serviceNames {
+		err = discover.Register(ctx, serviceName, node)
 		if err != nil {
 			return err
 		}
 	}
+
+	defer func() {
+		for _, serviceName := range serviceNames {
+			err = discover.Unregister(ctx, serviceName, node, true)
+			if err != nil {
+				log.Logger.Error(ctx, err)
+			}
+		}
+	}()
 
 	if req.AfterRegDiscover != nil {
 		if err = req.AfterRegDiscover(discover, node); err != nil {
 			return err
 		}
 	}
-
-	defer func() {
-		if len(req.SrvNames) > 0 {
-			for _, srvName := range req.SrvNames {
-				err = discover.Unregister(ctx, srvName, node, true)
-				if err != nil {
-					log.Logger.Error(ctx, err)
-				}
-			}
-		} else {
-			err = discover.Unregister(ctx, req.SrvName, node, true)
-			if err != nil {
-				log.Logger.Error(ctx, err)
-			}
-		}
-	}()
 
 	if req.OnReady != nil {
 		req.OnReady(grpcServer, node)

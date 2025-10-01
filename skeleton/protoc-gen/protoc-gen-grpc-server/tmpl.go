@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"{{.ServiceImportPath}}"
 	"{{.ServiceServerImportPath}}/handler"
@@ -40,13 +41,15 @@ func main() {
 		RegisterCustomServiceServerFunc: func(server *grpc.Server) error {
 			{{- $prefix := .ServiceNamespace -}}
 			{{- range .ServiceNames }}
-            {{$prefix}}.Register{{.}}Server(server, &handler.{{.}}{})
+            {{$prefix}}.Register{{.}}Server(server, &handler.{{.}}{
+				ServiceName: "{{$prefix}}.{{.}}",	
+			})
         	{{- end }}
         	return nil
 		},
 		OnReady: func(server *grpc.Server, node *discovery.Node) {
 			fmt.Printf("up node %s:%d!\n", node.Host, node.Port)
-			fmt.Printf(">>>>>>>>>>>>>>> run %+v at 2025-09-29 10:16:12 success <<<<<<<<<<<<<<<", ServiceNames)
+			fmt.Printf(">>>>>>>>>>>>>>> run %s success at 2025-09-29 10:16:12 <<<<<<<<<<<<<<<", strings.Join(ServiceNames, ", "))
 		},
 	})
 	if err != nil {
@@ -116,6 +119,7 @@ import (
 
 type {{.ServiceName}} struct {
 	{{.ServiceClientPackage}}.Unimplemented{{.ServiceName}}Server
+	ServiceName string
 }
 `
 var serviceHandlerUnaryMethodFileTemplate = `package handler

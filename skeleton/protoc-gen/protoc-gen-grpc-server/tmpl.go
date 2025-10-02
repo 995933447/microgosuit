@@ -73,7 +73,7 @@ func init() {
 var ServiceNames = []string{
 	{{- $prefix := .ServiceNamespace -}}
 	{{- range .ServiceNames }}
-	"{{$prefix}}.{{.}}",
+	{{$prefix}}.Microgosuit_{{.}}ServiceName,
 	{{- end }}
 }
 

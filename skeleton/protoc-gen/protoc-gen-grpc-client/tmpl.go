@@ -16,6 +16,8 @@ import (
 `
 
 var rpcFileDefineServiceTemplate = `
+const Microgosuit_{{.ServiceName}}ServiceName = "{{.ServiceNamespace}}.{{.ServiceName}}"
+
 var (
 	dial{{.ServiceName}}Opts                  []grpc.DialOption
 	dial{{.ServiceName}}OptsMergedDefault     []grpc.DialOption

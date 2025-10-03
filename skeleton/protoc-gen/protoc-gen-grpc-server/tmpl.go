@@ -73,7 +73,7 @@ func init() {
 var ServiceNames = []string{
 	{{- $prefix := .ServiceNamespace -}}
 	{{- range .ServiceNames }}
-	{{$prefix}}.Microgosuit_{{.}}ServiceName,
+	{{$prefix}}.MicrogosuitPbServiceName{{.}},
 	{{- end }}
 }
 
@@ -126,7 +126,7 @@ type {{.ServiceName}} struct {
 }
 
 var {{.ServiceName}}Handler = &{{.ServiceName}}{
-	ServiceName: {{.ServiceClientPackage}}.Microgosuit_{{.ServiceName}}ServiceName,
+	ServiceName: {{.ServiceClientPackage}}.MicrogosuitPbServiceName{{.ServiceName}},
 }
 `
 var serviceHandlerUnaryMethodFileTemplate = `package handler

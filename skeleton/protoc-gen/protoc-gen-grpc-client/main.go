@@ -82,7 +82,7 @@ func main() {
 		}
 
 		//  只生成有 Service 的 proto
-		if len(f.Services) == 0 {
+		if len(f.Messages) == 0 {
 			log.Printf("microgosuit gen-grpc-client, skipped gen %s\n", string(f.Desc.Name()))
 			continue
 		}
@@ -219,7 +219,7 @@ func genClientSkeleton(plugin *protogen.Plugin, f *protogen.File) error {
 		}
 	}
 
-	if _, err = plugin.NewGeneratedFile(f.GeneratedFilenamePrefix+"_microgosuit.pb.go", ".").Write(b.Bytes()); err != nil {
+	if _, err = plugin.NewGeneratedFile(f.GeneratedFilenamePrefix+"_microgosuit.pb.go", f.GoImportPath).Write(b.Bytes()); err != nil {
 		log.Println(runtimeutil.NewStackErr(err))
 		return err
 	}

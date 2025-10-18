@@ -193,6 +193,16 @@ func (d *Discovery) watchOne(srvName string) error {
 	oneSrvMu.Unlock()
 
 	filePath := d.getSrvFilePath(srvName)
+	if _, err = os.Stat(filePath); err != nil {
+		if !os.IsNotExist(err) {
+			return err
+		}
+
+		if _, err = os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0666); err != nil {
+			return err
+		}
+	}
+
 	var (
 		unwatchCh    = make(chan struct{})
 		watchSuccess bool

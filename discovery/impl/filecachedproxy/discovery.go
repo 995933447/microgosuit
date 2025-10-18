@@ -3,15 +3,16 @@ package filecachedproxy
 import (
 	"context"
 	"encoding/json"
-	"github.com/995933447/microgosuit/discovery"
-	"github.com/995933447/microgosuit/discovery/util"
-	"github.com/995933447/microgosuit/log"
-	"github.com/howeyc/fsnotify"
 	"io"
 	"os"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/995933447/microgosuit/discovery"
+	"github.com/995933447/microgosuit/discovery/util"
+	"github.com/995933447/microgosuit/log"
+	"github.com/howeyc/fsnotify"
 )
 
 type Discovery struct {
@@ -159,7 +160,9 @@ func (d *Discovery) Discover(ctx context.Context, srvName string) (*discovery.Se
 		d.srvMap[srvName] = srv
 	}
 
-	d.onSrvUpdate(ctx, discovery.EvtUpdated, srv)
+	if d.onSrvUpdate != nil {
+		d.onSrvUpdate(ctx, discovery.EvtUpdated, srv)
+	}
 
 	return srv, nil
 }

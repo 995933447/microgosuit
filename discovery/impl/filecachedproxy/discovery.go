@@ -1,7 +1,5 @@
 package filecachedproxy
 
-package filecachedproxy
-
 import (
 	"context"
 	"encoding/json"
